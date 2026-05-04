@@ -4,6 +4,14 @@ import random
 import re
 
 # ==============================
+# 🔗 LINK EXTRACTOR
+# ==============================
+
+def extract_link(text):
+    urls = re.findall(r'(https?://\S+)', text)
+    return urls[0] if urls else ""
+
+# ==============================
 # 🧠 INPUT ANALYZER
 # ==============================
 
@@ -13,7 +21,8 @@ def analyze_user_input(user_input):
     data = {
         "product": "",
         "target": "",
-        "problem": ""
+        "problem": "",
+        "link": extract_link(user_input)
     }
 
     # target detection
@@ -34,15 +43,15 @@ def analyze_user_input(user_input):
     else:
         data["product"] = "online skill"
 
-    # problem extraction (simple)
-    match = re.findall(r"(earn|learn|start|make money|freelancing)", text)
-    if match:
-        data["problem"] = match[0]
+    # problem detection
+    if "earn" in text:
+        data["problem"] = "earning"
+    elif "learn" in text:
+        data["problem"] = "learning"
     else:
         data["problem"] = "confusion"
 
     return data
-
 
 # ==============================
 # ✍️ POST GENERATOR
@@ -52,6 +61,7 @@ def generate_post(context, platform):
     product = context["product"]
     target = context["target"]
     problem = context["problem"]
+    link = context.get("link", "")
 
     hooks = [
         f"Most {target} are stuck in this loop...",
@@ -78,13 +88,11 @@ def generate_post(context, platform):
         "Let me know if you want the full breakdown."
     ]
 
-    # platform tone tweak
-    if platform == "reddit":
-        style = "short"
-    elif platform == "quora":
-        style = "detailed"
-    else:
-        style = "simple"
+    cta_line = random.choice(ctas)
+
+    # 👉 Link auto add
+    if link:
+        cta_line = f"{cta_line} {link}"
 
     post = f"""
 {random.choice(hooks)}
@@ -93,11 +101,10 @@ def generate_post(context, platform):
 
 {random.choice(insights)}
 
-{random.choice(ctas)}
+{cta_line}
 """
 
     return post.strip()
-
 
 # ==============================
 # 🌐 MULTI PLATFORM POSTS
