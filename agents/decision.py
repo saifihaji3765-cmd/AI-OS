@@ -1,48 +1,78 @@
 # agents/decision.py
 
 import random
+from config import MAX_REPLIES, DEBUG
 
-MAX_ACTIONS_PER_RUN = 5   # thoda increase (sell focus)
 
-action_count = 0
+# ==============================
+# ⚙️ INTERNAL STATE
+# ==============================
 
+reply_count = 0
+
+
+# ==============================
+# 🧠 RELEVANCE CHECK
+# ==============================
 
 def is_relevant(question):
-    """
-    Check karega ki question hamare product se related hai ya nahi
-    """
-
     q = question.lower()
 
     keywords = [
         "earn", "money", "income",
         "learn", "start", "beginner",
-        "ai", "trading", "coding", "freelancing"
+        "ai", "coding", "freelancing",
+        "online", "business"
     ]
 
-    for word in keywords:
-        if word in q:
-            return True
+    return any(word in q for word in keywords)
 
-    return False
 
+# ==============================
+# 🧠 DECISION FUNCTION
+# ==============================
 
 def make_decision(item):
-    global action_count
+    global reply_count
 
-    question = item["question"]
+    question = item.get("question", "")
+    score = item.get("score", 0)
+    engagement = item.get("engagement", 0)
 
-    # limit control
-    if action_count >= MAX_ACTIONS_PER_RUN:
+    # 🔒 Max reply limit
+    if reply_count >= MAX_REPLIES:
+        if DEBUG:
+            print("⛔ Max reply limit reached")
         return "skip"
 
-    # ❌ irrelevant → skip
+    # ❌ Not relevant
     if not is_relevant(question):
+        if DEBUG:
+            print("❌ Not relevant")
         return "skip"
 
-    # 🧠 human behavior (important)
+    # ❌ Low score
+    if score < 5:
+        if DEBUG:
+            print("❌ Low score")
+        return "skip"
+
+    # ❌ Dead engagement
+    if engagement == 0:
+        if DEBUG:
+            print("❌ No engagement")
+        return "skip"
+
+    # 🎲 Human randomness (important)
     if random.random() < 0.15:
+        if DEBUG:
+            print("🎲 Random skip (human behavior)")
         return "skip"
 
-    action_count += 1
+    # ✅ Approve reply
+    reply_count += 1
+
+    if DEBUG:
+        print("✅ Approved for reply")
+
     return "reply"
