@@ -1,86 +1,135 @@
 # agents/scraper.py
 
-import praw
+import random
 import feedparser
 
-# ==============================
-# 🔐 CONFIG (later config.py me shift karenge)
-# ==============================
-
-REDDIT_CLIENT_ID = "YOUR_CLIENT_ID"
-REDDIT_CLIENT_SECRET = "YOUR_CLIENT_SECRET"
-REDDIT_USER_AGENT = "ai-growth-engine"
-
-# ==============================
-# 🔴 REDDIT SETUP
-# ==============================
-
-reddit = praw.Reddit(
-    client_id=REDDIT_CLIENT_ID,
-    client_secret=REDDIT_CLIENT_SECRET,
-    user_agent=REDDIT_USER_AGENT
+from config import (
+    REDDIT_CLIENT_ID,
+    REDDIT_CLIENT_SECRET,
+    REDDIT_USER_AGENT,
+    KEYWORDS,
+    MAX_QUESTIONS,
+    DEBUG
 )
+
+# Reddit optional import (safe)
+try:
+    import praw
+    reddit = praw.Reddit(
+        client_id=REDDIT_CLIENT_ID,
+        client_secret=REDDIT_CLIENT_SECRET,
+        user_agent=REDDIT_USER_AGENT
+    )
+    REDDIT_ENABLED = True
+except:
+    REDDIT_ENABLED = False
+
 
 # ==============================
 # 🔴 REDDIT FETCH
 # ==============================
 
 def fetch_reddit():
-    subreddits = ["learnprogramming", "Entrepreneur", "learnpython"]
     results = []
 
-    for sub in subreddits:
-        for post in reddit.subreddit(sub).hot(limit=5):
-            if "?" in post.title:
+    if not REDDIT_ENABLED or not REDDIT_CLIENT_ID:
+        if DEBUG:
+            print("⚠️ Reddit disabled (no API keys)")
+        return results
+
+    try:
+        for keyword in KEYWORDS:
+            posts = reddit.subreddit("all").search(keyword, limit=5)
+
+            for post in posts:
+                if "?" in post.title:
+                    results.append({
+                        "question": post.title,
+                        "source": "reddit",
+                        "engagement": post.score
+                    })
+
+    except Exception as e:
+        if DEBUG:
+            print("❌ Reddit Error:", e)
+
+    return results
+
+
+# ==============================
+# 🟡 GOOGLE RSS FETCH
+# ==============================
+
+def fetch_google():
+    results = []
+
+    try:
+        for keyword in KEYWORDS:
+            url = f"https://news.google.com/rss/search?q={keyword.replace(' ', '+')}"
+            feed = feedparser.parse(url)
+
+            for entry in feed.entries[:5]:
                 results.append({
-                    "question": post.title,
-                    "source": f"reddit/{sub}",
-                    "engagement": post.score
+                    "question": entry.title,
+                    "source": "google",
+                    "engagement": random.randint(1, 10)
                 })
 
+    except Exception as e:
+        if DEBUG:
+            print("❌ Google RSS Error:", e)
+
     return results
 
+
 # ==============================
-# 🟡 QUORA (RSS BASED - SAFE)
+# 🔁 FALLBACK DATA
 # ==============================
 
-def fetch_quora():
-    feeds = [
-        "https://www.quora.com/q/python/rss",
-        "https://www.quora.com/q/startups/rss"
+def fallback_data():
+    sample = [
+        "How to earn money online as a beginner?",
+        "Best way to learn Python fast?",
+        "Can AI help me make money?",
+        "How to start freelancing with no experience?",
+        "What is the best online business idea?"
     ]
 
-    results = []
+    return [{
+        "question": q,
+        "source": "fallback",
+        "engagement": random.randint(1, 10)
+    } for q in sample]
 
-    for url in feeds:
-        feed = feedparser.parse(url)
-
-        for entry in feed.entries[:5]:
-            results.append({
-                "question": entry.title,
-                "source": "quora",
-                "engagement": 10  # approx (RSS me exact nahi milta)
-            })
-
-    return results
 
 # ==============================
-# 🟢 MAIN FUNCTION
+# 🧠 MAIN FUNCTION
 # ==============================
 
 def fetch_questions():
     all_data = []
 
-    try:
-        reddit_data = fetch_reddit()
-        all_data.extend(reddit_data)
-    except Exception as e:
-        print("Reddit error:", e)
+    if DEBUG:
+        print("📡 Fetching data...")
 
-    try:
-        quora_data = fetch_quora()
-        all_data.extend(quora_data)
-    except Exception as e:
-        print("Quora error:", e)
+    # Reddit
+    reddit_data = fetch_reddit()
+    all_data.extend(reddit_data)
+
+    # Google
+    google_data = fetch_google()
+    all_data.extend(google_data)
+
+    # If nothing found → fallback
+    if not all_data:
+        if DEBUG:
+            print("⚠️ No real data → using fallback")
+        all_data = fallback_data()
+
+    # Limit questions
+    all_data = all_data[:MAX_QUESTIONS]
+
+    if DEBUG:
+        print(f"✅ Total collected: {len(all_data)}")
 
     return all_data
