@@ -2,48 +2,87 @@
 
 import time
 import random
+from collections import deque
+from datetime import datetime
+
+from config import DEBUG, MIN_DELAY, MAX_DELAY
+
 
 # ==============================
 # ⚙️ LIMIT SETTINGS
 # ==============================
 
-MAX_ACTIONS_PER_MINUTE = 3
-COOLDOWN_TIME = (5, 15)  # seconds (random delay range)
+MAX_ACTIONS_PER_MINUTE = 4
+MAX_ACTIONS_PER_SESSION = 25
 
-# internal tracking
-action_timestamps = []
+# Track last actions
+action_times = deque()
+total_actions = 0
 
 
 # ==============================
-# 🧠 RISK CHECK FUNCTION
+# 🧠 TIME HELPER
+# ==============================
+
+def now():
+    return time.time()
+
+
+# ==============================
+# 🧠 CLEAN OLD DATA
+# ==============================
+
+def clean_old_actions():
+    current = now()
+
+    while action_times and current - action_times[0] > 60:
+        action_times.popleft()
+
+
+# ==============================
+# 🔒 MAIN RISK CHECK
 # ==============================
 
 def check_risk():
-    """
-    Decide karega system action le sakta hai ya nahi
-    """
+    global total_actions
 
-    global action_timestamps
+    try:
+        clean_old_actions()
 
-    current_time = time.time()
+        # ⛔ Session limit
+        if total_actions >= MAX_ACTIONS_PER_SESSION:
+            if DEBUG:
+                print("⛔ Session limit reached")
+            return False
 
-    # purane timestamps remove (1 min se purane)
-    action_timestamps = [
-        t for t in action_timestamps if current_time - t < 60
-    ]
+        # ⛔ Rate limit
+        if len(action_times) >= MAX_ACTIONS_PER_MINUTE:
+            wait_time = random.randint(20, 40)
 
-    # limit check
-    if len(action_timestamps) >= MAX_ACTIONS_PER_MINUTE:
-        print("⛔ Rate limit hit. Cooling down...")
-        time.sleep(random.randint(20, 40))
-        return False
+            if DEBUG:
+                print(f"⛔ Rate limit hit → sleeping {wait_time}s")
 
-    # random delay (human behavior)
-    delay = random.randint(*COOLDOWN_TIME)
-    print(f"⏳ Waiting {delay} sec (human behavior)")
-    time.sleep(delay)
+            time.sleep(wait_time)
+            return False
 
-    # action allowed → timestamp save
-    action_timestamps.append(current_time)
+        # 🎲 Random delay (human behavior)
+        delay = random.randint(MIN_DELAY, MAX_DELAY)
 
-    return True
+        if DEBUG:
+            print(f"⏳ Human delay: {delay}s")
+
+        time.sleep(delay)
+
+        # ✅ Log action
+        action_times.append(now())
+        total_actions += 1
+
+        return True
+
+    except Exception as e:
+        if DEBUG:
+            print("❌ Risk control error:", e)
+
+        # fail-safe → allow but slow
+        time.sleep(10)
+        return True
