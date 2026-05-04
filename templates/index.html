@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Marketing Tool</title>
+</head>
+<body>
+
+<h2>🧠 AI Marketing System</h2>
+
+<form method="POST">
+    <textarea name="input" rows="5" cols="50" placeholder="Enter your idea + link"></textarea><br><br>
+    <button type="submit">Generate</button>
+</form>
+
+{% if posts %}
+    <h3>🔴 Reddit</h3>
+    <p>{{ posts.reddit }}</p>
+
+    <h3>🟢 Quora</h3>
+    <p>{{ posts.quora }}</p>
+
+    <h3>🔵 Facebook</h3>
+    <p>{{ posts.facebook }}</p>
+{% endif %}
+
+</body>
+</html>
