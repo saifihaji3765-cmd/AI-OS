@@ -1,48 +1,88 @@
 # main.py
 
+import sys
+import traceback
+
 from agents.scraper import fetch_questions
 from agents.analyzer import analyze_questions
 from agents.decision import make_decision
 from agents.writer import generate_reply
+from agents.poster import post_reply
 
 from core.risk_control import check_risk
 from core.memory import save_data
+from database.db import init_db, save_to_db
 
 
 def run_system():
-    print("🚀 AI Growth Engine Started...\n")
+    print("=" * 50)
+    print("🚀 AI GROWTH ENGINE STARTED")
+    print("=" * 50)
 
-    # Step 1: Fetch data
-    questions = fetch_questions()
-    print(f"📥 Fetched {len(questions)} questions")
+    try:
+        # Initialize database
+        init_db()
 
-    # Step 2: Analyze data
-    analyzed = analyze_questions(questions)
-    print(f"🧠 Analyzed {len(analyzed)} questions")
+        # Step 1: Fetch questions
+        questions = fetch_questions()
+        print(f"📥 Total Questions Fetched: {len(questions)}")
 
-    for item in analyzed:
-        question = item["question"]
+        if not questions:
+            print("❌ No questions found. Exiting...")
+            return
 
-        # Step 3: Risk check
-        if not check_risk():
-            print("⚠️ High risk detected. Slowing down...\n")
-            break
+        # Step 2: Analyze
+        analyzed = analyze_questions(questions)
+        print(f"🧠 Analyzed Questions: {len(analyzed)}")
 
-        # Step 4: Decision making
-        decision = make_decision(item)
+        # Step 3: Process each
+        for i, item in enumerate(analyzed, start=1):
+            try:
+                question = item.get("question", "No Question")
+                source = item.get("source", "unknown")
 
-        if decision == "reply":
-            # Step 5: Generate reply
-            reply = generate_reply(question)
+                print("\n" + "-" * 50)
+                print(f"🔎 Processing #{i}")
+                print(f"❓ Question: {question}")
 
-            print("\n💬 Question:", question)
-            print("🤖 Reply:", reply)
+                # Step 4: Risk check
+                if not check_risk():
+                    print("⚠️ Risk high → stopping system")
+                    break
 
-            # Step 6: Save data
-            save_data(question, reply)
+                # Step 5: Decision
+                decision = make_decision(item)
+                print(f"🤔 Decision: {decision}")
 
-        else:
-            print(f"⏭️ Skipped: {question}")
+                if decision != "reply":
+                    continue
+
+                # Step 6: Generate reply
+                reply = generate_reply(question)
+
+                print("🤖 Generated Reply:")
+                print(reply)
+
+                # Step 7: Posting (manual/assist)
+                post_reply(question, reply, source)
+
+                # Step 8: Save memory
+                save_data(question, reply)
+
+                # Step 9: Save database
+                save_to_db(question, reply, source)
+
+            except Exception as inner_error:
+                print("❌ Error in processing item:")
+                traceback.print_exc()
+                continue
+
+        print("\n✅ System Finished Successfully")
+
+    except Exception as e:
+        print("💥 CRITICAL ERROR:")
+        traceback.print_exc()
+        sys.exit(1)
 
 
 if __name__ == "__main__":
