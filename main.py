@@ -1,5 +1,17 @@
 # main.py
+# main.py
 
+from ui.controller import run_interface
+
+def main():
+    print("=" * 50)
+    print("🚀 AI GROWTH ENGINE (CHAT MODE)")
+    print("=" * 50)
+
+    run_interface()
+
+if __name__ == "__main__":
+    main()
 import sys
 import traceback
 
