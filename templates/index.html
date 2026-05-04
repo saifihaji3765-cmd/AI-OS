@@ -3,12 +3,12 @@
 <head>
     <title>AI Marketing Tool</title>
     <style>
-        body { font-family: Arial; padding: 20px; background:#0f172a; color:white; }
+        body { font-family: Arial; padding:20px; background:#0f172a; color:white; }
         textarea { width:100%; padding:10px; }
-        button { padding:10px 15px; margin:5px; cursor:pointer; border:none; border-radius:6px; }
-        .gen { background:#22c55e; color:white; }
-        .send { background:#3b82f6; color:white; }
-        .copy { background:#f59e0b; color:white; }
+        button { padding:10px; margin:5px; cursor:pointer; border:none; border-radius:6px; }
+        .gen { background:#22c55e; }
+        .send { background:#3b82f6; }
+        .copy { background:#f59e0b; }
         .box { background:#1e293b; padding:15px; margin-top:15px; border-radius:10px; }
     </style>
 </head>
@@ -17,45 +17,43 @@
 <h2>🧠 AI Marketing System</h2>
 
 <form method="POST">
-    <textarea name="input" rows="4" placeholder="Enter your idea + link"></textarea><br><br>
-    <button class="gen" type="submit">Generate</button>
+<textarea name="input" rows="4" placeholder="Enter idea + link"></textarea><br>
+<button class="gen" type="submit">Generate</button>
 </form>
 
 {% if posts %}
 <div class="box">
-    <h3>🔴 Reddit</h3>
-    <p id="reddit">{{ posts.reddit }}</p>
-    <button class="copy" onclick="copyText('reddit')">Copy</button>
+<h3>Reddit</h3>
+<p id="r">{{ posts.reddit }}</p>
+<button class="copy" onclick="copyText('r')">Copy</button>
 </div>
 
 <div class="box">
-    <h3>🟢 Quora</h3>
-    <p id="quora">{{ posts.quora }}</p>
-    <button class="copy" onclick="copyText('quora')">Copy</button>
+<h3>Quora</h3>
+<p id="q">{{ posts.quora }}</p>
+<button class="copy" onclick="copyText('q')">Copy</button>
 </div>
 
 <div class="box">
-    <h3>🔵 Facebook</h3>
-    <p id="facebook">{{ posts.facebook }}</p>
-    <button class="copy" onclick="copyText('facebook')">Copy</button>
+<h3>Facebook</h3>
+<p id="f">{{ posts.facebook }}</p>
+<button class="copy" onclick="copyText('f')">Copy</button>
 </div>
 
-<br>
-<button class="send" onclick="sendAll()">🚀 SEND ALL</button>
+<button class="send" onclick="sendAll()">SEND ALL</button>
 {% endif %}
 
 <script>
 function copyText(id){
     let text = document.getElementById(id).innerText;
     navigator.clipboard.writeText(text);
-    alert("Copied!");
+    alert("Copied");
 }
 
 function sendAll(){
-    window.open("https://www.reddit.com", "_blank");
-    window.open("https://www.quora.com", "_blank");
-    window.open("https://www.facebook.com", "_blank");
-    alert("Platforms opened 🚀 Paste & post");
+    window.open("https://www.reddit.com");
+    window.open("https://www.quora.com");
+    window.open("https://www.facebook.com");
 }
 </script>
 
