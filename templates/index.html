@@ -2,14 +2,16 @@
 <html>
 <head>
     <title>AI Marketing Tool</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { font-family: Arial; padding:20px; background:#0f172a; color:white; }
-        textarea { width:100%; padding:10px; }
-        button { padding:10px; margin:5px; cursor:pointer; border:none; border-radius:6px; }
-        .gen { background:#22c55e; }
-        .send { background:#3b82f6; }
-        .copy { background:#f59e0b; }
-        .box { background:#1e293b; padding:15px; margin-top:15px; border-radius:10px; }
+        textarea { width:100%; padding:10px; border-radius:8px; border:none; }
+        button { padding:10px 15px; margin:5px; cursor:pointer; border:none; border-radius:8px; }
+        .gen { background:#22c55e; color:white; }
+        .send { background:#3b82f6; color:white; }
+        .copy { background:#f59e0b; color:white; }
+        .box { background:#1e293b; padding:15px; margin-top:15px; border-radius:12px; }
+        h2 { margin-bottom:10px; }
     </style>
 </head>
 <body>
@@ -17,49 +19,60 @@
 <h2>🧠 AI Marketing System</h2>
 
 <form method="POST">
-<textarea name="input" rows="4" placeholder="Enter idea + link"></textarea><br>
-<button class="gen" type="submit">Generate</button>
+    <textarea name="input" rows="4" placeholder="Enter idea + link"></textarea><br><br>
+    <button class="gen" type="submit">Generate</button>
 </form>
 
 {% if posts %}
+
 <div class="box">
-<h3>Reddit</h3>
-<p id="r">{{ posts.reddit }}</p>
-<button class="copy" onclick="copyText('r')">Copy</button>
+    <h3>🔴 Reddit</h3>
+    <p id="r">{{ posts.reddit }}</p>
+    <button class="copy" onclick="copyText('r')">Copy</button>
+    <button class="send" onclick="openPlatform('reddit','r')">Post</button>
 </div>
 
 <div class="box">
-<h3>Quora</h3>
-<p id="q">{{ posts.quora }}</p>
-<button class="copy" onclick="copyText('q')">Copy</button>
+    <h3>🟢 Quora</h3>
+    <p id="q">{{ posts.quora }}</p>
+    <button class="copy" onclick="copyText('q')">Copy</button>
+    <button class="send" onclick="openPlatform('quora','q')">Post</button>
 </div>
 
 <div class="box">
-<h3>Facebook</h3>
-<p id="f">{{ posts.facebook }}</p>
-<button class="copy" onclick="copyText('f')">Copy</button>
+    <h3>🔵 Facebook</h3>
+    <p id="f">{{ posts.facebook }}</p>
+    <button class="copy" onclick="copyText('f')">Copy</button>
+    <button class="send" onclick="openPlatform('facebook','f')">Post</button>
 </div>
 
-<button class="send" onclick="sendAll()">SEND ALL</button>
 {% endif %}
 
 <script>
 function copyText(id){
     let text = document.getElementById(id).innerText;
     navigator.clipboard.writeText(text);
-    alert("Copied");
+    alert("Copied ✔️");
 }
 
-<br><br>
+function openPlatform(platform, id){
+    let text = document.getElementById(id).innerText;
 
-<button class="send" onclick="openPlatform('reddit','r')">Post on Reddit</button>
+    // auto copy
+    navigator.clipboard.writeText(text);
 
-<button class="send" onclick="openPlatform('quora','q')">Post on Quora</button>
+    // open platform (new tab)
+    if(platform === "reddit"){
+        window.open("https://www.reddit.com/submit", "_blank");
+    }
+    else if(platform === "quora"){
+        window.open("https://www.quora.com/", "_blank");
+    }
+    else if(platform === "facebook"){
+        window.open("https://www.facebook.com/", "_blank");
+    }
 
-<button class="send" onclick="openPlatform('facebook','f')">Post on Facebook</button>{
-    window.open("https://www.reddit.com");
-    window.open("https://www.quora.com");
-    window.open("https://www.facebook.com");
+    alert("Post copied 🚀\n\n👉 Ab paste (CTRL + V) karke post karo");
 }
 </script>
 
