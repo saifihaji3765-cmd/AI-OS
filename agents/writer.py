@@ -1,12 +1,14 @@
 # agents/writer.py
 
 import random
+from config import DEBUG
+
 
 # ==============================
-# 🧠 REPLY STYLES
+# 🧠 DATA POOLS (HUMAN STYLE)
 # ==============================
 
-openers = [
+OPENERS = [
     "Bhai honestly bolu",
     "Simple baat hai",
     "Agar tu beginner hai",
@@ -14,29 +16,49 @@ openers = [
     "Ye problem bahut common hai"
 ]
 
-value_lines = [
-    "sabse pehle basics clear karna padta hai warna aage sab confuse hota hai",
-    "log directly advance cheezon par jump karte hain aur wahi galti hoti hai",
+VALUE_LINES = [
+    "sabse pehle basics strong karna padta hai warna aage sab confuse hota hai",
+    "log direct advanced cheezon par jump karte hain aur wahi galti hoti hai",
     "agar sahi roadmap mil jaye to learning fast ho jati hai",
-    "consistency aur sahi direction sabse important hoti hai",
-    "random cheeze try karne se time waste hota hai"
+    "random cheeze try karne se sirf time waste hota hai",
+    "consistency + direction hi game change karta hai"
 ]
 
-experience_lines = [
-    "maine bhi starting me bahut time waste kiya tha",
+EXPERIENCE_LINES = [
+    "maine bhi starting me kaafi time waste kiya tha",
     "mujhe bhi ye samajhne me time laga",
-    "pehle mujhe bhi koi clear direction nahi thi",
-    "trial and error me kaafi time gaya",
+    "pehle mujhe koi clear direction nahi mil rahi thi",
+    "trial and error me kaafi phase gaya",
     "baad me ek simple system follow kiya"
 ]
 
-soft_hooks = [
+HOOKS = [
     "agar tu chahe to main explain kar sakta hoon kaise kaam karta hai",
-    "agar interested ho to bata deta hoon pura step by step",
-    "agar tu serious hai to main share kar sakta hoon",
-    "agar chaho to main simple breakdown de dunga",
+    "agar interested ho to bata deta hoon step by step",
+    "agar serious hai to main pura breakdown share kar sakta hoon",
+    "agar chaho to main simple roadmap de dunga",
     "agar help chahiye ho to bol dena"
 ]
+
+
+# ==============================
+# 🎯 QUESTION INTENT DETECTION
+# ==============================
+
+def detect_intent(question):
+    q = question.lower()
+
+    if "earn" in q or "money" in q:
+        return "money"
+
+    if "learn" in q or "start" in q:
+        return "learning"
+
+    if "ai" in q:
+        return "ai"
+
+    return "general"
+
 
 # ==============================
 # ✍️ REPLY GENERATOR
@@ -44,14 +66,36 @@ soft_hooks = [
 
 def generate_reply(question):
     """
-    High-converting human-like reply generate karta hai
+    High-converting human-like reply
     """
 
-    opener = random.choice(openers)
-    value = random.choice(value_lines)
-    exp = random.choice(experience_lines)
-    hook = random.choice(soft_hooks)
+    try:
+        opener = random.choice(OPENERS)
+        value = random.choice(VALUE_LINES)
+        exp = random.choice(EXPERIENCE_LINES)
+        hook = random.choice(HOOKS)
 
-    reply = f"{opener}, {value}. {exp} jisse mujhe clarity mili. {hook}."
+        intent = detect_intent(question)
 
-    return reply
+        # 🎯 Intent-based tweak
+        if intent == "money":
+            extra = "agar tu sahi approach use kare to earning start kar sakta hai"
+        elif intent == "learning":
+            extra = "agar tu structured tareeke se chale to fast progress karega"
+        elif intent == "ai":
+            extra = "AI tools sahi use kare to kaafi kaam easy ho jata hai"
+        else:
+            extra = "agar tu sahi direction pakad le to result milta hai"
+
+        reply = f"{opener}, {value}. {exp} jisse mujhe clarity mili. {extra}. {hook}."
+
+        if DEBUG:
+            print("✍️ Reply generated")
+
+        return reply
+
+    except Exception as e:
+        if DEBUG:
+            print("❌ Writer error:", e)
+
+        return "Bhai agar tu chahe to main help kar sakta hoon isme."
