@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Growth Engine</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    background: linear-gradient(135deg, #0f172a, #020617);
+    color:white;
+    min-height:100vh;
+    padding:20px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+    margin-bottom:20px;
+    font-weight:600;
+    font-size:28px;
+}
+
+.card{
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(15px);
+    border-radius:16px;
+    padding:20px;
+    margin-top:20px;
+    box-shadow:0 0 25px rgba(0,0,0,0.3);
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+textarea{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:12px;
+    background:#020617;
+    color:white;
+    resize:none;
+    font-size:14px;
+}
+
+textarea:focus{
+    outline:none;
+    border:1px solid #3b82f6;
+}
+
+.btn{
+    padding:10px 16px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    margin-top:10px;
+    margin-right:5px;
+    font-size:13px;
+}
+
+.generate{
+    background:linear-gradient(45deg,#22c55e,#4ade80);
+    color:black;
+    font-weight:600;
+}
+
+.copy{
+    background:#f59e0b;
+}
+
+.open{
+    background:#3b82f6;
+}
+
+.badge{
+    font-size:12px;
+    opacity:0.7;
+    margin-bottom:5px;
+}
+
+.post{
+    margin-top:10px;
+    font-size:14px;
+    line-height:1.6;
+}
+
+.platform{
+    font-weight:600;
+    margin-bottom:8px;
+}
+
+.footer{
+    text-align:center;
+    margin-top:30px;
+    font-size:12px;
+    opacity:0.5;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🚀 AI Growth Engine</h1>
+
+<div class="card">
+<form method="POST">
+<textarea name="input" rows="3" placeholder="Describe your product + paste your link..."></textarea>
+<button class="btn generate" type="submit">⚡ Generate Strategy</button>
+</form>
+</div>
+
+{% if results %}
+
+{% for item in results %}
+
+<div class="card">
+
+<div class="platform">
+{{ item.platform | upper }}
+</div>
+
+<div class="post" id="post{{ loop.index }}">
+{{ item.content }}
+</div>
+
+<button class="btn copy" onclick="copyText('post{{ loop.index }}')">📋 Copy</button>
+
+{% if item.platform == "reddit" %}
+<button class="btn open" onclick="openLink('https://www.reddit.com/submit','post{{ loop.index }}')">🔴 Post</button>
+{% elif item.platform == "quora" %}
+<button class="btn open" onclick="openLink('https://www.quora.com/','post{{ loop.index }}')">🟢 Answer</button>
+{% elif item.platform == "facebook" %}
+<button class="btn open" onclick="openLink('https://www.facebook.com/','post{{ loop.index }}')">🔵 Post</button>
+{% endif %}
+
+</div>
+
+{% endfor %}
+
+{% endif %}
+
+<div class="footer">
+AI Powered System • Built for Growth 🚀
+</div>
+
+</div>
+
+<script>
+
+function copyText(id){
+    let text = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(text);
+    alert("Copied ✔️");
+}
+
+function openLink(url, id){
+    let text = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(text);
+    window.open(url, "_blank");
+    alert("Content copied 🚀\nPaste it there");
+}
+
+</script>
+
+</body>
+</html>
