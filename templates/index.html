@@ -9,39 +9,42 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Poppins',sans-serif;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 
 body{
-    background: linear-gradient(135deg, #0f172a, #020617);
+    background: radial-gradient(circle at top,#0f172a,#020617);
     color:white;
     min-height:100vh;
     padding:20px;
 }
 
 .container{
-    max-width:1000px;
+    max-width:1100px;
     margin:auto;
 }
 
-h1{
+.header{
     text-align:center;
-    margin-bottom:20px;
+    margin-bottom:25px;
+}
+
+.header h1{
+    font-size:30px;
     font-weight:600;
-    font-size:28px;
+}
+
+.header p{
+    font-size:13px;
+    opacity:0.6;
 }
 
 .card{
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(15px);
-    border-radius:16px;
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(18px);
+    border-radius:18px;
     padding:20px;
     margin-top:20px;
-    box-shadow:0 0 25px rgba(0,0,0,0.3);
+    box-shadow:0 0 30px rgba(0,0,0,0.4);
     border:1px solid rgba(255,255,255,0.08);
 }
 
@@ -52,7 +55,6 @@ textarea{
     border-radius:12px;
     background:#020617;
     color:white;
-    resize:none;
     font-size:14px;
 }
 
@@ -61,46 +63,49 @@ textarea:focus{
     border:1px solid #3b82f6;
 }
 
+.commands{
+    margin-top:15px;
+}
+
 .btn{
     padding:10px 16px;
     border:none;
     border-radius:10px;
     cursor:pointer;
-    margin-top:10px;
-    margin-right:5px;
+    margin:5px;
     font-size:13px;
+    transition:0.3s;
 }
 
-.generate{
-    background:linear-gradient(45deg,#22c55e,#4ade80);
-    color:black;
-    font-weight:600;
+.btn:hover{
+    transform:scale(1.05);
 }
 
-.copy{
-    background:#f59e0b;
-}
+.telegram{background:#22c55e;color:black;}
+.reddit{background:#ff4500;}
+.quora{background:#b92b27;}
+.facebook{background:#1877f2;}
+.blog{background:#a855f7;}
+.report{background:#f59e0b;color:black;}
 
-.open{
-    background:#3b82f6;
-}
-
-.badge{
-    font-size:12px;
-    opacity:0.7;
-    margin-bottom:5px;
-}
-
-.post{
-    margin-top:10px;
-    font-size:14px;
-    line-height:1.6;
+.box{
+    margin-top:15px;
+    padding:15px;
+    border-radius:12px;
+    background:#020617;
 }
 
 .platform{
     font-weight:600;
-    margin-bottom:8px;
+    margin-bottom:10px;
 }
+
+.actions{
+    margin-top:10px;
+}
+
+.copy{background:#f59e0b;}
+.send{background:#3b82f6;}
 
 .footer{
     text-align:center;
@@ -115,12 +120,31 @@ textarea:focus{
 
 <div class="container">
 
+<div class="header">
 <h1>🚀 AI Growth Engine</h1>
+<p>Command-Based AI System</p>
+</div>
 
 <div class="card">
 <form method="POST">
-<textarea name="input" rows="3" placeholder="Describe your product + paste your link..."></textarea>
-<button class="btn generate" type="submit">⚡ Generate Strategy</button>
+<textarea name="input" rows="3" placeholder="Enter product + link..."></textarea>
+
+<div class="commands">
+
+<button class="btn telegram" name="command" value="telegram">Telegram Auto</button>
+
+<button class="btn reddit" name="command" value="reddit">Reddit Data</button>
+
+<button class="btn quora" name="command" value="quora">Quora Answers</button>
+
+<button class="btn facebook" name="command" value="facebook">Facebook Post</button>
+
+<button class="btn blog" name="command" value="blog">Blog Generate</button>
+
+<button class="btn report" name="command" value="report">System Report</button>
+
+</div>
+
 </form>
 </div>
 
@@ -134,19 +158,19 @@ textarea:focus{
 {{ item.platform | upper }}
 </div>
 
-<div class="post" id="post{{ loop.index }}">
+<div class="box" id="post{{ loop.index }}">
 {{ item.content }}
 </div>
 
+<div class="actions">
+
 <button class="btn copy" onclick="copyText('post{{ loop.index }}')">📋 Copy</button>
 
-{% if item.platform == "reddit" %}
-<button class="btn open" onclick="openLink('https://www.reddit.com/submit','post{{ loop.index }}')">🔴 Post</button>
-{% elif item.platform == "quora" %}
-<button class="btn open" onclick="openLink('https://www.quora.com/','post{{ loop.index }}')">🟢 Answer</button>
-{% elif item.platform == "facebook" %}
-<button class="btn open" onclick="openLink('https://www.facebook.com/','post{{ loop.index }}')">🔵 Post</button>
+{% if item.post_url %}
+<button class="btn send" onclick="openLink('{{ item.post_url }}','post{{ loop.index }}')">🚀 Send</button>
 {% endif %}
+
+</div>
 
 </div>
 
@@ -155,7 +179,7 @@ textarea:focus{
 {% endif %}
 
 <div class="footer">
-AI Powered System • Built for Growth 🚀
+Built for Rehman Saifi 💎
 </div>
 
 </div>
@@ -172,7 +196,7 @@ function openLink(url, id){
     let text = document.getElementById(id).innerText;
     navigator.clipboard.writeText(text);
     window.open(url, "_blank");
-    alert("Content copied 🚀\nPaste it there");
+    alert("Content copied 🚀 Paste it there");
 }
 
 </script>
