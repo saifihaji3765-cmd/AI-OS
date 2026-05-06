@@ -1,87 +1,122 @@
-import time
-from config import (
-    MAX_POSTS_PER_RUN,
-    DELAY_BETWEEN_ACTIONS,
-    ENABLE_RATE_LIMIT,
-    AUTO_POST_TELEGRAM,
-    TELEGRAM_BOT_TOKEN,
-    TELEGRAM_CHAT_ID,
-    DEBUG
-)
-
-from agents.scraper import get_target_data
-from agents.writer import generate_all_content
-
-import requests
+from agents.scraper import get_target_questions
+from agents.writer import generate_all_content, generate_blog
+from agents.poster import process_content
+from config import SYSTEM_STATS, DEBUG
 
 
 # =========================
-# 🟣 TELEGRAM SENDER (AUTO)
+# 🧠 MAIN COMMAND SYSTEM
 # =========================
-def send_to_telegram(message):
-    if not AUTO_POST_TELEGRAM:
-        return False
-
-    try:
-        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-
-        payload = {
-            "chat_id": TELEGRAM_CHAT_ID,
-            "text": message
-        }
-
-        res = requests.post(url, data=payload, timeout=10)
-
-        return res.status_code == 200
-
-    except Exception as e:
-        if DEBUG:
-            print("Telegram Error:", e)
-        return False
-
-
-# =========================
-# 🧠 MAIN SYSTEM RUNNER
-# =========================
-def run_system(user_link=None):
+def run_system(user_input="", command=""):
     """
-    Full system execute karega
+    Command based AI system
     """
 
-    # STEP 1: scrape data
-    raw_posts = get_target_data()
+    command = command.lower().strip()
 
-    if not raw_posts:
-        return []
+    # =========================
+    # 🔵 TELEGRAM COMMAND
+    # =========================
+    if command == "telegram":
+        posts = get_target_questions()
 
-    # STEP 2: limit control
-    selected_posts = raw_posts[:MAX_POSTS_PER_RUN]
+        if not posts:
+            return [{"platform": "system", "content": "No data found"}]
 
-    # STEP 3: generate content
-    all_content = generate_all_content(selected_posts)
+        content = generate_all_content(posts, user_input)
 
-    final_output = []
+        final = process_content([c for c in content if c["platform"] == "telegram"])
 
-    # STEP 4: process each content
-    for item in all_content:
-        try:
-            platform = item["platform"]
-            content = item["content"]
+        return final
 
-            # Telegram auto post
-            if platform == "telegram":
-                if AUTO_POST_TELEGRAM:
-                    send_to_telegram(content)
 
-            # save for UI/manual platforms
-            final_output.append(item)
+    # =========================
+    # 🔴 REDDIT COMMAND
+    # =========================
+    elif command == "reddit":
+        posts = get_target_questions()
 
-            # rate limit
-            if ENABLE_RATE_LIMIT:
-                time.sleep(DELAY_BETWEEN_ACTIONS)
+        if not posts:
+            return [{"platform": "system", "content": "No questions found"}]
 
-        except Exception as e:
-            if DEBUG:
-                print("Brain Error:", e)
+        content = generate_all_content(posts, user_input)
 
-    return final_output
+        reddit_only = [c for c in content if c["platform"] == "reddit"]
+
+        return process_content(reddit_only)
+
+
+    # =========================
+    # 🟢 QUORA COMMAND
+    # =========================
+    elif command == "quora":
+        posts = get_target_questions()
+
+        if not posts:
+            return [{"platform": "system", "content": "No questions found"}]
+
+        content = generate_all_content(posts, user_input)
+
+        quora_only = [c for c in content if c["platform"] == "quora"]
+
+        return process_content(quora_only)
+
+
+    # =========================
+    # 🔵 FACEBOOK COMMAND
+    # =========================
+    elif command == "facebook":
+        posts = get_target_questions()
+
+        if not posts:
+            return [{"platform": "system", "content": "No data found"}]
+
+        content = generate_all_content(posts, user_input)
+
+        fb_only = [c for c in content if c["platform"] == "facebook"]
+
+        return process_content(fb_only)
+
+
+    # =========================
+    # 📝 BLOG COMMAND
+    # =========================
+    elif command == "blog":
+        if not user_input:
+            return [{"platform": "system", "content": "Enter topic for blog"}]
+
+        blog = generate_blog(user_input, user_input)
+
+        return [{
+            "platform": "blog",
+            "content": blog
+        }]
+
+
+    # =========================
+    # 📊 REPORT COMMAND
+    # =========================
+    elif command == "report":
+        report = f"""
+📊 System Report
+
+Questions Fetched: {SYSTEM_STATS['questions_fetched']}
+Answers Generated: {SYSTEM_STATS['answers_generated']}
+Telegram Posts: {SYSTEM_STATS['telegram_posts']}
+Manual Posts: {SYSTEM_STATS['manual_posts']}
+"""
+
+        return [{
+            "platform": "report",
+            "content": report.strip()
+        }]
+
+
+    # =========================
+    # ❌ UNKNOWN COMMAND
+    # =========================
+    else:
+        return [{
+            "platform": "system",
+            "content": "Invalid command (use: telegram / reddit / quora / facebook / blog / report)"
+        }]
