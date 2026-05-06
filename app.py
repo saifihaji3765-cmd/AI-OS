@@ -5,28 +5,28 @@ from config import DEBUG
 app = Flask(__name__)
 
 
+# =========================
+# 🏠 HOME ROUTE
+# =========================
 @app.route("/", methods=["GET", "POST"])
 def home():
     results = []
 
     if request.method == "POST":
-        user_input = request.form.get("input", "").strip()
+        user_input = request.form.get("input", "")
+        command = request.form.get("command", "")
 
         if DEBUG:
-            print("User Input:", user_input)
+            print("INPUT:", user_input)
+            print("COMMAND:", command)
 
-        # run full AI system
-        results = run_system(user_input)
+        results = run_system(user_input, command)
 
     return render_template("index.html", results=results)
 
 
-# Health check (Render ke liye useful)
-@app.route("/health")
-def health():
-    return {"status": "ok"}
-
-
+# =========================
+# 🚀 RUN APP
+# =========================
 if __name__ == "__main__":
-    # Render ke liye required
     app.run(host="0.0.0.0", port=10000)
