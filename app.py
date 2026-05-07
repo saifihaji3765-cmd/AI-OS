@@ -1,32 +1,30 @@
 from flask import Flask, render_template, request
-from agents.brain import run_system
-from config import DEBUG
+from agents.brain import process_input
 
 app = Flask(__name__)
 
-
 # =========================
-# 🏠 HOME ROUTE
+# HOME
 # =========================
 @app.route("/", methods=["GET", "POST"])
 def home():
-    results = []
+
+    response = ""
 
     if request.method == "POST":
-        user_input = request.form.get("input", "")
-        command = request.form.get("command", "")
 
-        if DEBUG:
-            print("INPUT:", user_input)
-            print("COMMAND:", command)
+        user_input = request.form.get("user_input")
 
-        results = run_system(user_input, command)
+        if user_input:
+            response = process_input(user_input)
 
-    return render_template("index.html", results=results)
-
+    return render_template(
+        "index.html",
+        response=response
+    )
 
 # =========================
-# 🚀 RUN APP
+# RUN APP
 # =========================
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    app.run(host="0.0.0.0", port=5000)
