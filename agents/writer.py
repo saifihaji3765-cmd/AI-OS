@@ -1,162 +1,76 @@
-import re
-from config import DEFAULT_LINK, CTA_STYLE, TONE, SYSTEM_STATS, DEBUG
+from config import DEFAULT_CTA
 
 
-# =========================
-# 🔗 LINK EXTRACTOR
-# =========================
-def extract_link(text):
-    match = re.search(r'(https?://\S+)', text)
-    return match.group(0) if match else DEFAULT_LINK
+def generate_post(user_input):
+    """
+    Human-like content generator
+    """
 
+    text = user_input.lower()
 
-# =========================
-# 🎯 CTA GENERATOR
-# =========================
-def generate_cta(user_input=""):
-    link = extract_link(user_input)
+    # =====================================
+    # AI / CODING POSTS
+    # =====================================
 
-    if CTA_STYLE == "soft":
-        return f"If you want, you can check this here: {link}"
-    else:
-        return f"Check this now: {link}"
+    if "ai" in text or "coding" in text:
 
+        return f"""
+🚀 Learning AI + Coding right now is one of the smartest decisions.
 
-# =========================
-# 🧠 HUMAN ANSWER ENGINE
-# =========================
-def generate_human_answer(question, body="", user_input=""):
-    intro_lines = [
-        "I’ve seen many people struggle with this.",
-        "This is actually more common than you think.",
-        "A lot of beginners get stuck here."
-    ]
+Most students waste years consuming random content without building real skills.
 
-    solution_lines = [
-        "The real solution is to follow a clear and simple system.",
-        "Instead of random trying, you need a structured approach.",
-        "The difference comes from doing the right steps consistently."
-    ]
+The real advantage comes from:
+✅ building projects
+✅ solving problems
+✅ learning by doing
 
-    intro = intro_lines[hash(question) % len(intro_lines)]
-    solution = solution_lines[hash(question) % len(solution_lines)]
+Start small.
+Stay consistent.
+Build real systems.
 
-    cta = generate_cta(user_input)
-
-    answer = f"""
-{intro}
-
-{question}
-
-{solution}
-
-{cta}
+{DEFAULT_CTA}
 """
 
-    SYSTEM_STATS["answers_generated"] += 1
+    # =====================================
+    # BUSINESS / SELLING POSTS
+    # =====================================
 
-    return answer.strip()
+    if "sell" in text or "business" in text:
 
+        return f"""
+🔥 Most people try to sell products.
 
-# =========================
-# 📝 BLOG GENERATOR (SEO)
-# =========================
-def generate_blog(topic, user_input=""):
-    link = extract_link(user_input)
+Smart people solve problems.
 
-    blog = f"""
-# {topic.title()}
+If your product:
+- saves time
+- improves skills
+- helps people grow
 
-## Introduction
-Many people are confused about this topic. Let's break it down in a simple way.
+people will naturally become interested.
 
-## Main Problem
-People usually try random things and fail.
+Focus on value first.
+Sales come later.
 
-## Solution
-The best way is to follow a step-by-step system and stay consistent.
-
-## Final Tip
-Focus on one thing and take action daily.
-
-## Resource
-{link}
+{DEFAULT_CTA}
 """
 
-    return blog.strip()
+    # =====================================
+    # DEFAULT POST
+    # =====================================
 
+    return f"""
+⚡ Human-Like AI Post
 
-# =========================
-# 🔴 REDDIT FORMAT
-# =========================
-def format_reddit(post, user_input=""):
-    return {
-        "platform": "reddit",
-        "title": post["title"],
-        "content": generate_human_answer(post["title"], post["body"], user_input),
-        "url": post.get("url", "")
-    }
+Your command:
+{user_input}
 
+This system can generate:
+- business posts
+- AI content
+- coding content
+- marketing content
+- CTA based posts
 
-# =========================
-# 🟢 QUORA FORMAT
-# =========================
-def format_quora(post, user_input=""):
-    return {
-        "platform": "quora",
-        "content": generate_human_answer(post["title"], post["body"], user_input),
-        "url": post.get("url", "")
-    }
-
-
-# =========================
-# 🔵 FACEBOOK FORMAT
-# =========================
-def format_facebook(post, user_input=""):
-    content = f"""
-Most people ignore this...
-
-{post['title']}
-
-Clarity beats motivation.
-
-{generate_cta(user_input)}
+{DEFAULT_CTA}
 """
-    return {
-        "platform": "facebook",
-        "content": content.strip()
-    }
-
-
-# =========================
-# 🟣 TELEGRAM FORMAT
-# =========================
-def format_telegram(post, user_input=""):
-    content = f"""
-🔥 {post['title']}
-
-{generate_human_answer(post['title'], post['body'], user_input)}
-"""
-    return {
-        "platform": "telegram",
-        "content": content.strip()
-    }
-
-
-# =========================
-# 🚀 MAIN FUNCTION
-# =========================
-def generate_all_content(posts, user_input=""):
-    results = []
-
-    for post in posts:
-        try:
-            results.append(format_reddit(post, user_input))
-            results.append(format_quora(post, user_input))
-            results.append(format_facebook(post, user_input))
-            results.append(format_telegram(post, user_input))
-        except Exception as e:
-            if DEBUG:
-                print("Writer Error:", e)
-
-    return results
