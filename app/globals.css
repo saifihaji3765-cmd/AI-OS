@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================
+   GLOBAL
+========================= */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html,
+body{
+    background:#050816;
+    color:white;
+
+    width:100%;
+    min-height:100%;
+
+    font-family:Arial, sans-serif;
+
+    overflow-x:hidden;
+}
+
+/* =========================
+   SCROLLBAR
+========================= */
+
+::-webkit-scrollbar{
+    width:8px;
+}
+
+::-webkit-scrollbar-track{
+    background:#050816;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#7b2cff;
+    border-radius:20px;
+}
+
+/* =========================
+   INPUT
+========================= */
+
+input,
+textarea{
+    outline:none;
+}
+
+/* =========================
+   SMOOTH
+========================= */
+
+*{
+    scroll-behavior:smooth;
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+
+@keyframes glow {
+
+    0%{
+        box-shadow:
+        0 0 10px rgba(0,240,255,0.2);
+    }
+
+    50%{
+        box-shadow:
+        0 0 30px rgba(0,240,255,0.5);
+    }
+
+    100%{
+        box-shadow:
+        0 0 10px rgba(0,240,255,0.2);
+    }
+}
+
+.glow-animation{
+    animation:glow 3s infinite;
+}
