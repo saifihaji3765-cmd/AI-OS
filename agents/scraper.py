@@ -1,132 +1,160 @@
 import requests
-import re
-from config import TARGET_TOPICS, MAX_POSTS_PER_RUN, DEBUG
-
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (AI-Growth-Engine)"
-}
+from bs4 import BeautifulSoup
+from config import HEADERS
 
 
-# =========================
-# 🔴 FETCH REDDIT
-# =========================
-def fetch_reddit_posts(limit=50):
-    url = f"https://www.reddit.com/r/all/new.json?limit={limit}"
-    posts = []
+def search_real_data(user_input):
+    """
+    Real multi-platform scraper
+    """
+
+    results = []
+
+    query = user_input.lower()
+
+    # =====================================
+    # REDDIT
+    # =====================================
 
     try:
-        res = requests.get(url, headers=HEADERS, timeout=10)
 
-        if res.status_code != 200:
-            if DEBUG:
-                print("Reddit fetch failed:", res.status_code)
-            return []
+        reddit_url = "https://www.reddit.com/r/learnprogramming/new.json?limit=5"
 
-        data = res.json()
+        response = requests.get(
+            reddit_url,
+            headers=HEADERS,
+            timeout=10
+        )
 
-        for item in data["data"]["children"]:
-            p = item["data"]
+        if response.status_code == 200:
 
-            post = {
-                "platform": "reddit",
-                "id": p.get("id"),
-                "title": p.get("title", ""),
-                "body": p.get("selftext", ""),
-                "url": "https://www.reddit.com" + p.get("permalink", ""),
-                "score": p.get("score", 0),
-                "comments": p.get("num_comments", 0)
-            }
+            data = response.json()
 
-            posts.append(post)
+            for post in data["data"]["children"]:
 
-    except Exception as e:
-        if DEBUG:
-            print("Scraper Error:", e)
+                title = post["data"]["title"]
 
-    return posts
+                if query in title.lower() or len(query) > 2:
 
+                    results.append(
+                        f"🔴 Reddit:\n{title}"
+                    )
 
-# =========================
-# 🧠 SMART FILTER
-# =========================
-def is_high_intent_question(text):
-    """
-    High intent identify karega
-    """
-    patterns = [
-        r"how to",
-        r"how do i",
-        r"best way",
-        r"what is the best",
-        r"how can i",
-        r"guide",
-        r"tips",
-        r"help",
-        r"earn",
-        r"make money",
-        r"learn",
-    ]
+    except Exception:
+        pass
 
-    return any(re.search(p, text) for p in patterns)
+    # =====================================
+    # HACKER NEWS
+    # =====================================
 
+    try:
 
-def filter_relevant_posts(posts):
-    filtered = []
+        hn_url = "https://news.ycombinator.com/"
 
-    for post in posts:
-        title = post["title"].lower()
-        body = post["body"].lower()
-        text = title + " " + body
+        response = requests.get(
+            hn_url,
+            headers=HEADERS,
+            timeout=10
+        )
 
-        # ❌ skip empty / low quality
-        if len(title) < 15:
-            continue
+        soup = BeautifulSoup(
+            response.text,
+            "html.parser"
+        )
 
-        # ❌ no question
-        if "?" not in title:
-            continue
+        titles = soup.select(".titleline a")
 
-        # ❌ low engagement
-        if post["comments"] < 2:
-            continue
+        for item in titles[:5]:
 
-        # ❌ keyword match
-        if not any(keyword in text for keyword in TARGET_TOPICS):
-            continue
+            text = item.text.strip()
 
-        # ❌ high intent check
-        if not is_high_intent_question(text):
-            continue
+            if text:
 
-        # ❌ spam words remove
-        if any(bad in text for bad in ["giveaway", "free crypto", "nsfw"]):
-            continue
+                results.append(
+                    f"🟠 HackerNews:\n{text}"
+                )
 
-        filtered.append(post)
+    except Exception:
+        pass
 
-    return filtered
+    # =====================================
+    # DEV.TO
+    # =====================================
 
+    try:
 
-# =========================
-# 🚀 FINAL FUNCTION
-# =========================
-def get_target_questions():
-    raw_posts = fetch_reddit_posts()
+        devto_url = "https://dev.to/"
 
-    filtered_posts = filter_relevant_posts(raw_posts)
+        response = requests.get(
+            devto_url,
+            headers=HEADERS,
+            timeout=10
+        )
 
-    # 🔥 ranking (best posts first)
-    sorted_posts = sorted(
-        filtered_posts,
-        key=lambda x: (x["comments"] + x["score"]),
-        reverse=True
-    )
+        soup = BeautifulSoup(
+            response.text,
+            "html.parser"
+        )
 
-    selected = sorted_posts[:MAX_POSTS_PER_RUN]
+        articles = soup.select("h2 a")
 
-    if DEBUG:
-        print(f"Fetched: {len(raw_posts)}")
-        print(f"Filtered: {len(filtered_posts)}")
-        print(f"Selected: {len(selected)}")
+        for item in articles[:5]:
 
-    return selected
+            text = item.text.strip()
+
+            if text:
+
+                results.append(
+                    f"🟣 Dev.to:\n{text}"
+                )
+
+    except Exception:
+        pass
+
+    # =====================================
+    # STACK EXCHANGE
+    # =====================================
+
+    try:
+
+        stack_url = "https://stackoverflow.com/questions"
+
+        response = requests.get(
+            stack_url,
+            headers=HEADERS,
+            timeout=10
+        )
+
+        soup = BeautifulSoup(
+            response.text,
+            "html.parser"
+        )
+
+        questions = soup.select(".s-post-summary--content-title a")
+
+        for item in questions[:5]:
+
+            text = item.text.strip()
+
+            if text:
+
+                results.append(
+                    f"🔵 StackOverflow:\n{text}"
+                )
+
+    except Exception:
+        pass
+
+    # =====================================
+    # NO RESULTS
+    # =====================================
+
+    if not results:
+
+        return []
+
+    # =====================================
+    # LIMIT RESULTS
+    # =====================================
+
+    return results[:10]
