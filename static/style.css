@@ -1,0 +1,185 @@
+/* =========================
+   GLOBAL
+========================= */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#050816;
+    color:white;
+    font-family:Arial, sans-serif;
+    min-height:100vh;
+}
+
+/* =========================
+   MAIN CONTAINER
+========================= */
+
+.container{
+    width:90%;
+    max-width:1200px;
+    margin:auto;
+    padding:40px 20px;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.header{
+    text-align:center;
+    margin-bottom:40px;
+}
+
+.header h1{
+    font-size:55px;
+    margin-bottom:10px;
+
+    background:linear-gradient(
+        90deg,
+        #00f0ff,
+        #7b2cff,
+        #ff00ea
+    );
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.header p{
+    color:#9aa4c7;
+    font-size:18px;
+}
+
+/* =========================
+   CARD
+========================= */
+
+.card{
+    background:#0d1329;
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    border-radius:25px;
+
+    padding:25px;
+
+    margin-bottom:30px;
+
+    box-shadow:
+    0 0 30px rgba(0,240,255,0.08);
+}
+
+/* =========================
+   TITLES
+========================= */
+
+.card h2{
+    margin-bottom:20px;
+    color:#00f0ff;
+}
+
+/* =========================
+   TEXTAREA
+========================= */
+
+textarea{
+    width:100%;
+    height:180px;
+
+    border:none;
+    outline:none;
+
+    border-radius:20px;
+
+    background:#111936;
+    color:white;
+
+    padding:20px;
+
+    font-size:16px;
+
+    resize:none;
+
+    margin-bottom:20px;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+button{
+    background:linear-gradient(
+        90deg,
+        #00f0ff,
+        #7b2cff
+    );
+
+    border:none;
+
+    color:white;
+
+    padding:14px 30px;
+
+    border-radius:15px;
+
+    cursor:pointer;
+
+    font-size:16px;
+    font-weight:bold;
+
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+
+    box-shadow:
+    0 0 20px rgba(0,240,255,0.4);
+}
+
+/* =========================
+   RESULT
+========================= */
+
+.result-card pre{
+    white-space:pre-wrap;
+
+    line-height:1.7;
+
+    color:#d6def7;
+
+    font-size:15px;
+}
+
+/* =========================
+   ACTION BUTTONS
+========================= */
+
+.buttons{
+    margin-top:20px;
+
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:768px){
+
+    .header h1{
+        font-size:38px;
+    }
+
+    textarea{
+        height:150px;
+    }
+
+}
